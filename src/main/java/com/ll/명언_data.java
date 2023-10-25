@@ -10,6 +10,7 @@ public class 명언_data {
     int user_number;
 
     public 명언_data(int user_number) {
+        this.user_number = user_number;
         this.load(user_number);
     }
 
