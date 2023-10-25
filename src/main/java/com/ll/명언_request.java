@@ -16,12 +16,18 @@ public class 명언_request {
             "수정?id=.. : 등록되어있는 id의 명언과 작가를 수정합니다.\n" +
             "삭제?id=.. : 입력한 id의 명언과 작가를 삭제합니다.\n" +
             "빌드 : 현재의 저장된 id,명언,작가를 파일에 저장합니다.\n" +
+            "경로 : 원하는 저장경로를 지정합니다.\n" +
             "종료 : 현재상태를 저장하지 않고 종료합니다.\n";
     private final static String errorMessage = "오류가 발생했습니다. 요청을 다시 진행해주세요.";
     명언_data data;
-
+    명언_userManage um;
     명언_request() {
-        data = new 명언_data();
+        um = new 명언_userManage();
+        if (um.getUser_number() == 0) {
+            System.out.println("데이터를 얻는데 실패했습니다. 프로그램을 종료합니다.");
+            return;
+        }
+        data = new 명언_data(um.getUser_number());
         System.out.println(infoMessage);
         request_wait();
     }
@@ -42,7 +48,7 @@ public class 명언_request {
         } catch (IOException ioe) {
             System.out.println(errorMessage);
             request_wait();
-        } catch (Exception e){
+        } catch (Exception e) {
             request_wait();
         }
     }
@@ -59,9 +65,11 @@ public class 명언_request {
                 System.out.println(data.list());
                 break;
             case "빌드":
-                if(data.save()) System.out.println("data.json 파일의 내용이 갱신되었습니다.\n");
+                if (data.save()) System.out.println("파일의 내용이 갱신되었습니다.\n");
                 else System.out.println("정상적으로 저장되지 않았습니다.\n");
                 break;
+            case "경로":
+                um.set_path();
             case "종료":
                 System.out.println("명언 앱이 종료됩니다.");
                 return;
@@ -104,7 +112,7 @@ public class 명언_request {
     private void delete(int id) throws IOException {
         if (data.delete(id)) {
             System.out.println(id + "번 명언이 삭제되었습니다.\n");
-        } else{
+        } else {
             System.out.println(id + "번 명언이 존재하지 않습니다.\n");
         }
     }

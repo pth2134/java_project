@@ -7,9 +7,10 @@ import java.util.StringTokenizer;
 public class 명언_data {
     private HashMap<Integer, 명언> data = new HashMap<>();
     int id = 1;
+    int user_number;
 
-    public 명언_data() {
-        this.load();
+    public 명언_data(int user_number) {
+        this.load(user_number);
     }
 
     public int getId() {
@@ -31,19 +32,28 @@ public class 명언_data {
     public StringBuilder list() {
         StringBuilder sb = new StringBuilder();
         for (int i = 1; i < id; i++) {
-            try{
+            try {
                 sb.append(data.get(i).getInfo());
-            } catch (NullPointerException npe){
+            } catch (NullPointerException npe) {
                 continue;
             }
         }
         return sb;
     }
 
+    public boolean delete(int id) {
+        if (data.containsKey(id)) {
+            data.remove(id);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public boolean save() {
         StringBuilder sb = new StringBuilder();
         try {
-            FileWriter f = new FileWriter("data.json");
+            FileWriter f = new FileWriter("data" + user_number + ".json");
             sb.append("[").append("\n");
             for (int i = 1; i < id; i++) {
                 try {
@@ -63,18 +73,9 @@ public class 명언_data {
         }
     }
 
-    public boolean delete(int id) {
-        if (data.containsKey(id)) {
-            data.remove(id);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    void load() {
+    void load(int user_number) {
         try {
-            BufferedReader br = new BufferedReader(new FileReader("data.json"));
+            BufferedReader br = new BufferedReader(new FileReader("data" + user_number + ".json"));
             br.readLine();
             String str;
             while (!(str = br.readLine()).equals("]") && str != null) {
