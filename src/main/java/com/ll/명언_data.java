@@ -2,28 +2,27 @@ package com.ll;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.StringTokenizer;
 
 public class 명언_data {
     private HashMap<Integer, 명언> data = new HashMap<>();
     int id = 1;
-    int user_number;
 
-    public 명언_data(int user_number) {
-        this.user_number = user_number;
-        this.load(user_number);
+    public 명언_data() {
+        this.load();
     }
 
     public int getId() {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public 명언 getData(int id) {
         return data.get(id);
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public void addData(int id, String phrase, String author) {
@@ -32,12 +31,34 @@ public class 명언_data {
 
     public StringBuilder list() {
         StringBuilder sb = new StringBuilder();
-        for (int i = 1; i < id; i++) {
+        for (Integer i : data.keySet()) {
             try {
                 sb.append(data.get(i).getInfo());
             } catch (NullPointerException npe) {
                 continue;
             }
+        }
+        return sb;
+    }
+
+    public StringBuilder my_list(HashSet<Integer> my_phrase) {
+        StringBuilder sb = new StringBuilder();
+        try {
+            HashSet<Integer> mp = my_phrase;
+        } catch (NullPointerException npe) {
+            return sb;
+        }
+        try {
+            for (int i : my_phrase) {
+                try {
+                    sb.append(data.get(i).getInfo());
+                } catch (NullPointerException npe) {
+                    my_phrase.remove(i);
+                    continue;
+                }
+            }
+        } catch (NullPointerException npe) {
+
         }
         return sb;
     }
@@ -54,14 +75,14 @@ public class 명언_data {
     public boolean save() {
         StringBuilder sb = new StringBuilder();
         try {
-            FileWriter f = new FileWriter("data" + user_number + ".json");
+            FileWriter f = new FileWriter("data.json");
             sb.append("[").append("\n");
             for (int i = 1; i < id; i++) {
                 try {
                     sb.append(data.get(i).jsonForm());
                     if (i != id - 1) sb.append(",");
                     sb.append("\n");
-                } catch (Exception e) {
+                } catch (NullPointerException npe) {
                     continue;
                 }
             }
@@ -74,9 +95,9 @@ public class 명언_data {
         }
     }
 
-    void load(int user_number) {
+    void load() {
         try {
-            BufferedReader br = new BufferedReader(new FileReader("data" + user_number + ".json"));
+            BufferedReader br = new BufferedReader(new FileReader("data.json"));
             br.readLine();
             String str;
             while (!(str = br.readLine()).equals("]") && str != null) {
@@ -84,7 +105,7 @@ public class 명언_data {
                 st.nextToken();
                 int id = Integer.parseInt(st.nextToken());
                 this.id = id;
-                st = new StringTokenizer(br.readLine(), ("\":,"));
+                st = new StringTokenizer(br.readLine().trim(), ("\":,"));
                 st.nextToken();
                 st.nextToken();
                 st.nextToken();
@@ -95,6 +116,7 @@ public class 명언_data {
                 data.put(id, new 명언(id, content, author));
                 br.readLine();
             }
+            if (data.size() == 0) id = 0;
             id++;
         } catch (FileNotFoundException fnfe) {
             System.out.println("기존 파일을 찾을 수 없습니다. 새로운 파일을 생성합니다.\n");

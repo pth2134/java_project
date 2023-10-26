@@ -2,7 +2,13 @@
   {
     "user_number" : 1,
     "id" : "xogns",
-    "password" : "1111"
-    "data_path" : "null"
+    "password" : "1111",
+    "my_phrase" : {1,}
+  },
+  {
+    "user_number" : 2,
+    "id" : "xogns2",
+    "password" : "2222",
+    "my_phrase" : {2,}
   }
 ]

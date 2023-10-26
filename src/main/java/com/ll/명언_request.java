@@ -13,21 +13,22 @@ public class 명언_request {
     private final static String infoMessage = "-----명령목록-----\n" +
             "등록 : 명언과 작가를 등록합니다.\n" +
             "목록 : 등록되어 있는 id / 작가 / 명언을 보여줍니다.\n" +
+            "나의 명언 : 내가 등록한 명언의 목록을 보여줍니다.\n" +
             "수정?id=.. : 등록되어있는 id의 명언과 작가를 수정합니다.\n" +
             "삭제?id=.. : 입력한 id의 명언과 작가를 삭제합니다.\n" +
             "빌드 : 현재의 저장된 id,명언,작가를 파일에 저장합니다.\n" +
-            "경로 : 원하는 저장경로를 지정합니다.(미구현)\n" +
+            "로그아웃 : 로그아웃합니다.\n" +
             "종료 : 현재상태를 저장하지 않고 종료합니다.\n";
-    private final static String errorMessage = "오류가 발생했습니다. 요청을 다시 진행해주세요.";
+    private final String errorMessage = "오류가 발생했습니다. 요청을 다시 진행해주세요.";
+    private final String notMyPhrase = "다른 사람이 작성한 명언입니다.";
+    private final String noPhrase = "작성한 명언이 없습니다.";
     명언_data data;
     명언_userManage um;
+
     명언_request() {
         um = new 명언_userManage();
-        if (um.getUser_number() == 0) {
-            System.out.println("데이터를 얻는데 실패했습니다. 프로그램을 종료합니다.");
-            return;
-        }
-        data = new 명언_data(um.getUser_number());
+        if (!um.check_user()) return;
+        data = new 명언_data();
         System.out.println(infoMessage);
         request_wait();
     }
@@ -48,9 +49,10 @@ public class 명언_request {
         } catch (IOException ioe) {
             System.out.println(errorMessage);
             request_wait();
-        } catch (Exception e) {
-            request_wait();
         }
+//        catch (NullPointerException npe) {
+//            request_wait();
+//        }
     }
 
     private void request_execute(String request) throws IOException {
@@ -59,17 +61,30 @@ public class 명언_request {
             case "등록":
                 int id = data.getId();
                 this.regist(id);
+                um.set_my_phrase(id);
                 data.setId(id + 1);
                 break;
             case "목록":
-                System.out.println(data.list());
+                sb = data.list();
+                if (sb.isEmpty()) System.out.println(noPhrase);
+                else System.out.println(sb);
+                break;
+            case "나의 명언":
+                sb = data.my_list(um.getMy_phrase());
+                if (sb.isEmpty()) System.out.println(noPhrase);
+                else System.out.println(sb);
                 break;
             case "빌드":
-                if (data.save()) System.out.println("파일의 내용이 갱신되었습니다.\n");
+                if (data.save()) System.out.println("파일의 내용이 갱신되었습니다.");
+                if (um.save()) System.out.println("사용자 정보가 갱신되었습니다.\n");
                 else System.out.println("정상적으로 저장되지 않았습니다.\n");
                 break;
-            case "경로":
-                um.set_path();
+//            case "경로":
+//                um.set_path();
+            case "로그아웃":
+                um.logOut();
+                if (!um.check_user()) return;
+                break;
             case "종료":
                 System.out.println("명언 앱이 종료됩니다.");
                 return;
@@ -86,10 +101,14 @@ public class 명언_request {
         //수정,삭제를 실행하는 메소드
         switch (request) {
             case "수정":
-                this.adjust(id);
+                if (um.is_my_phrase(id)) this.adjust(id);
+                else System.out.println(notMyPhrase);
                 break;
             case "삭제":
-                this.delete(id);
+                if (um.is_my_phrase(id)) {
+                    this.delete(id);
+                    um.delete_my_phrase(id);
+                } else System.out.println(notMyPhrase);
                 break;
         }
         request_wait();
