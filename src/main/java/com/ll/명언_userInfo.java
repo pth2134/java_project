@@ -1,12 +1,29 @@
 package com.ll;
 
 import java.util.HashSet;
+import java.util.List;
 
 public class 명언_userInfo {
     private String password;
     private int user_number;
     private String user_id;
     private HashSet<Integer> my_phrase;
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setUser_number(int user_number) {
+        this.user_number = user_number;
+    }
+
+    public void setUser_id(String user_id) {
+        this.user_id = user_id;
+    }
+
+    public void setMy_phrase(List<Integer> my_phrase) {
+        this.my_phrase = new HashSet<>(my_phrase);
+    }
 
     public String getUser_id() {
         return user_id;
@@ -19,11 +36,14 @@ public class 명언_userInfo {
         this.my_phrase = my_phrase;
     }
 
+    public 명언_userInfo() {
+    }
+
     public HashSet<Integer> getMy_phrase() {
         return my_phrase;
     }
 
-    public void setMy_phrase(int phrase_id) {
+    public void setAsMy_phrase(int phrase_id) {
         my_phrase.add(phrase_id);
     }
 

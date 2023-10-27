@@ -5,6 +5,7 @@ public class 명언 {
     private String content;
     private String author;
 
+    명언(){}
     명언(int id, String content, String author) {
         this.id = id;
         this.content = content;
@@ -19,6 +20,14 @@ public class 명언 {
         this.author = author;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public String getContent() {
         return content;
     }
@@ -27,7 +36,7 @@ public class 명언 {
         this.content = content;
     }
 
-    public String getInfo() {
+    public String makeInfo() {
         return id + " / " + author + " / " + content + "\n";
     }
 

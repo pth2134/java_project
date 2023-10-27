@@ -1,7 +1,13 @@
 package com.ll;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class 명언_userManage {
     private HashMap<String, 명언_userInfo> user_data = new HashMap<>();
@@ -42,6 +48,8 @@ public class 명언_userManage {
             }
         } catch (IOException ioe) {
             error_print();
+        } catch (NumberFormatException nfe){
+            return;
         }
         in_or_up();
     }
@@ -138,7 +146,7 @@ public class 명언_userManage {
     }
 
     public void set_my_phrase(int phrase_id) {
-        user_data.get(user_id).setMy_phrase(phrase_id);
+        user_data.get(user_id).setAsMy_phrase(phrase_id);
     }
 
     public void delete_my_phrase(int phrase_id) {
@@ -165,62 +173,69 @@ public class 명언_userManage {
     }
 
     public boolean save() {
-        StringBuilder sb = new StringBuilder();
         try {
             FileWriter f = new FileWriter("user_data.json");
-            sb.append("[").append("\n");
-            Set<String> keySet = user_data.keySet();
-            int size = keySet.size();
-            int j = 1;
-            for (String i : keySet) {
-                try {
-                    sb.append(user_data.get(i).jsonForm());
-                    if (j != size) sb.append(",");
-                    sb.append("\n");
-                    j++;
-                } catch (Exception e) {
-                    continue;
-                }
-            }
-            sb.append("]");
-            f.write(sb.toString());
+//            StringBuilder sb = new StringBuilder();
+//            sb.append("[").append("\n");
+//            Set<String> keySet = user_data.keySet();
+//            int size = keySet.size();
+//            int j = 1;
+//            for (String i : keySet) {
+//                try {
+//                    sb.append(user_data.get(i).jsonForm());
+//                    if (j != size) sb.append(",");
+//                    sb.append("\n");
+//                    j++;
+//                } catch (Exception e) {
+//                    continue;
+//                }
+//            }
+//            sb.append("]");
+//            f.write(sb.toString());
+            ObjectMapper objectMapper = new ObjectMapper();
+            f.write(objectMapper.writeValueAsString(user_data));
             f.close();
             return true;
-        } catch (IOException ioe) {
+        } catch (IOException | NullPointerException npe) {
             return false;
         }
     }
 
     void load() {
         try {
-            BufferedReader br = new BufferedReader(new FileReader("user_data.json"));
-            br.readLine();
-            String str;
-            while (!(str = br.readLine()).equals("]") && str != null) {
-                StringTokenizer st = new StringTokenizer(br.readLine(), ("\":, "));
-                st.nextToken();
-                int user_number = Integer.parseInt(st.nextToken());
-                last_number = Math.max(user_number, last_number);
-                st = new StringTokenizer(br.readLine(), ("\":, "));
-                st.nextToken();
-                String id = st.nextToken();
-                st = new StringTokenizer(br.readLine(), ("\":, "));
-                st.nextToken();
-                String password = st.nextToken();
-//                st = new StringTokenizer(br.readLine(), ("\":,"));
+//            BufferedReader br = new BufferedReader(new FileReader("user_data.json"));
+//            br.readLine();
+//            String str;
+//            while (!(str = br.readLine()).equals("]") && str != null) {
+//                StringTokenizer st = new StringTokenizer(br.readLine(), ("\":, "));
 //                st.nextToken();
+//                int user_number = Integer.parseInt(st.nextToken());
+//                last_number = Math.max(user_number, last_number);
+//                st = new StringTokenizer(br.readLine(), ("\":, "));
 //                st.nextToken();
-//                String data_path = st.nextToken();
-                st = new StringTokenizer(br.readLine(), ("\":, {}"));
-                st.nextToken();
-                HashSet<Integer> my_phrase = new HashSet<>();
-                while (st.hasMoreTokens()) {
-                    my_phrase.add(Integer.parseInt(st.nextToken()));
-                }
-                user_data.put(id, new 명언_userInfo(user_number, id, password, my_phrase));
-                br.readLine();
-            }
-            last_number++;
+//                String id = st.nextToken();
+//                st = new StringTokenizer(br.readLine(), ("\":, "));
+//                st.nextToken();
+//                String password = st.nextToken();
+////                st = new StringTokenizer(br.readLine(), ("\":,"));
+////                st.nextToken();
+////                st.nextToken();
+////                String data_path = st.nextToken();
+//                st = new StringTokenizer(br.readLine(), ("\":, {}"));
+//                st.nextToken();
+//                HashSet<Integer> my_phrase = new HashSet<>();
+//                while (st.hasMoreTokens()) {
+//                    my_phrase.add(Integer.parseInt(st.nextToken()));
+//                }
+//                user_data.put(id, new 명언_userInfo(user_number, id, password, my_phrase));
+//                br.readLine();
+//            }
+//            last_number++;
+            ObjectMapper objectMapper = new ObjectMapper();
+            String json = Files.readString(Paths.get("user_data.json"));
+            TypeReference<HashMap<String,명언_userInfo>> typeReference = new TypeReference<HashMap<String, 명언_userInfo>>() {};
+            user_data = objectMapper.readValue(json, typeReference);
+            findLastUserNum();
         } catch (FileNotFoundException fnfe) {
             System.out.println("유저 정보가 존재하지 않습니다.\n");
             return;
@@ -228,5 +243,12 @@ public class 명언_userManage {
             System.out.println("유저 정보를 불러오는데 오류가 발생했습니다. 새로 등록해주세요.\n");
             return;
         }
+    }
+
+    private void findLastUserNum(){
+        user_data.forEach((key,value)->{
+            this.last_number = Math.max(this.last_number,value.getUser_number());
+        });
+        last_number++;
     }
 }
